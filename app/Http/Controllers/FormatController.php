@@ -5,26 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\JsonHandler;
 use App\Formats\FormatContext;
 use Illuminate\Http\Request;
+use App\Services\FormatService;
+
 
 class FormatController extends Controller
 {
+    protected $formatService;
+
+    public function __construct(FormatService $formatService)
+    {
+        $this->formatService = $formatService;
+    }
+
     public function process(Request $request)
     {
+        // Retrieve data from the request body
         $data = $request->getContent();
 
-        $formatHandler = new JsonHandler();
+        // Process the data using the FormatService
+        $result = $this->formatService->processData($data);
 
-        $context = new FormatContext($formatHandler);
-
-        $result = $context->executeOperations($data);
-
-        $response = [
-            'status' => 'success',
-            'message' => 'User registered successfully!',
-            'data' => $result
-        ];
-
-        return response()->json($response);
+        // Return the result to the user
+        return response()->json(['result' => $result]);
     }
 
 
