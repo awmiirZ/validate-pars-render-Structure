@@ -3,48 +3,29 @@
 namespace App\Models;
 
 use App\Formats\FormatHandler;
-class JsonHandler implements FormatHandler {
-    public function validate($data) {
-        // JSON data validation logic for sign-up form
-        $decodedData = json_decode($data, true);
+use App\Services\FormatService;
 
-        \Log::info('Decoded JSON data:', [$decodedData]);
+class JsonHandler implements FormatHandler
+{
+    protected $formatService;
 
-        if (!isset($decodedData['name']) || !isset($decodedData['email']) || !isset($decodedData['password'])) {
-            \Log::info('Validation failed: Required fields are missing.');
-            return false;
-        }
-
-        if (!filter_var($decodedData['email'], FILTER_VALIDATE_EMAIL)) {
-            \Log::info('Validation failed: Invalid email format.');
-            return false;
-        }
-
-
-        \Log::info('Validation succeeded.');
-        return true;
+    public function __construct(FormatService $formatService)
+    {
+        $this->formatService = $formatService;
     }
 
-
-    public function parse($data) {
-        $data = json_decode($data, true);
-
-        $parsedData = [
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'password' => $data['password'],
-        ];
-
-        return $parsedData;
+    public function validate($data)
+    {
+        return $this->formatService->validateJson($data);
     }
 
-    public function render($data) {
-        $responseData = [
-            'status' => 'success',
-            'message' => 'User registered successfully!',
-            'data' => $data,
-        ];
+    public function parse($data)
+    {
+        return $this->formatService->parseJson($data);
+    }
 
-        return json_encode($responseData);
+    public function render($data)
+    {
+        return $this->formatService->renderJson($data);
     }
 }
